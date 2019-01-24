@@ -43,4 +43,7 @@ dependencies {
 
     implementation "android.arch.lifecycle:extensions:$lifecycle_version"
     implementation "android.arch.lifecycle:viewmodel:$lifecycle_version" // use -ktx for Kotlin
+
+    //Biblioteca Picasso
+    implementation 'com.squareup.picasso:picasso:2.71828'
 }

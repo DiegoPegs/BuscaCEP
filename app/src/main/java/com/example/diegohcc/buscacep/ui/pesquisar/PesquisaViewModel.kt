@@ -10,17 +10,21 @@ class PesquisaViewModel : ViewModel() {
     val enderecoRepository = EnderecoRepository()
     val endereco = MutableLiveData<Endereco>()
     val msgErro = MutableLiveData<String>()
+    val isLoading = MutableLiveData<Boolean>()
 
     fun buscar(cep: String) {
+        isLoading.value = true
         enderecoRepository.buscar(
                 cep,
                 onComplete = {
                     endereco.value = it
                     msgErro.value = ""
+                    isLoading.value = false
                 },
                 onError = {
                     endereco.value = null
                     msgErro.value = it?.message
+                    isLoading.value = false
                 }
         )
     }

@@ -18,7 +18,12 @@ class EnderecoRepository {
                     }
 
                     override fun onResponse(call: Call<Endereco>?, response: Response<Endereco>?) {
-                        onComplete(response?.body())
+                        if (response?.isSuccessful == true){
+                            onComplete(response?.body())
+                        }else{
+                            onError(Throwable(response?.errorBody()?.string()))
+                        }
+
                     }
                 })
     }

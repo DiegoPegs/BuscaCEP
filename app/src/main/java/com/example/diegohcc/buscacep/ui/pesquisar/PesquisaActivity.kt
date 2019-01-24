@@ -1,65 +1,53 @@
 package com.example.diegohcc.buscacep.ui.pesquisar
 
+import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProviders
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import com.example.diegohcc.buscacep.R
-import com.example.diegohcc.buscacep.api.EnderecoService
-import com.example.diegohcc.buscacep.model.Endereco
-import com.example.diegohcc.buscacep.repository.EnderecoRepository
+import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_pesquisa.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import com.facebook.stetho.okhttp3.StethoInterceptor
-import okhttp3.OkHttpClient
-
-
 
 
 class PesquisaActivity : AppCompatActivity() {
+
+    lateinit var pesquisaViewModel: PesquisaViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pesquisa)
 
+        Picasso
+                .get()
+                .load("http://kiiway.com/wp-content/uploads/2016/10/icon-location.png")
+                .into(ivLogo)
+
+
+
+        pesquisaViewModel = ViewModelProviders.of(this).get(PesquisaViewModel::class.java)
+
         btPesquisar.setOnClickListener {
-            pesquisar()
+            pesquisaViewModel.buscar(etCEP.text.toString())
         }
-    }
+        pesquisaViewModel.endereco.observe(this, Observer {
+            tvResultado.text = it?.logradouro
+        })
 
-     fun pesquisar() {
+        pesquisaViewModel.msgErro.observe(this, Observer {
+            if (!it.equals("")) {
+                Toast.makeText(this, it, Toast.LENGTH_LONG).show()
+            }
+        })
 
-         val okhttp = OkHttpClient.Builder()
-                 .addNetworkInterceptor(StethoInterceptor())
-                 .build();
-
-         val retrofit = Retrofit.Builder()
-                 .baseUrl("https://viacep.com.br/")
-                 .addConverterFactory(GsonConverterFactory.create())
-                 .client(okhttp)
-                 .build()
-
-         val service = retrofit.create(EnderecoService::class.java)
-
-         service.buscar(etCEP.text.toString())
-                 .enqueue(object : Callback<Endereco>{
-                     override fun onFailure(call: Call<Endereco>?, t: Throwable?) {
-                         Toast.makeText(this@PesquisaActivity, t?.message, Toast.LENGTH_LONG).show()
-                     }
-
-                     override fun onResponse(call: Call<Endereco>?, response: Response<Endereco>?) {
-                         if (response?.isSuccessful == true){
-                             tvResultado.text = response.body()?.logradouro
-                         }else{
-                             Toast.makeText(this@PesquisaActivity, "Erro ao buscar o CEP", Toast.LENGTH_LONG).show()
-                         }
-                     }
-
-                 })
-
+        pesquisaViewModel.isLoading.observe(this, Observer { isLoading ->
+            if (isLoading == true) {
+                loading.visibility = View.VISIBLE
+            }else{
+                loading.visibility = View.GONE
+            }
+        })
     }
 
 
